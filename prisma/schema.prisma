@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  OWNER
+}
+
+model Account {
+  id Int @id @default(autoincrement())
+  clerkId String @unique
+  email String @unique
+  name String?
+  role Role
+  createdAt DateTime @default(now())
+
+  //realtions
+  subscriptions Subscription[] @relation("UserSubscriptions")
+  ownerSubscriptions Subscription[] @relation("OwnerSubscriptions")
+  sessions ParkingSession[]
+  parkingLot ParkingLot? @relation("OwnerParkingLot")
+}
+
+
+model ParkingLot {
+  id Int @id @default(autoincrement())
+  ownerId Int @unique
+  owner Account @relation("OwnerParkingLot",fields: [ownerId], references:[id])
+
+  name String?
+  longitude Float
+  latitude Float
+  address String?
+  lotCapacity Int
+  pricePerHour Int
+  createdAt DateTime? @default(now())
+
+  sessions ParkingSession[]
+}
+
+model Subscription {
+  id Int @id @default(autoincrement())
+
+  userId Int
+  user Account @relation("UserSubscriptions", fields: [userId], references: [id])
+
+  ownerId Int
+  owner Account @relation("OwnerSubscriptions",fields: [ownerId], references: [id])
+
+  subscribedAt DateTime @default(now())
+  isActive Boolean @default(true)
+
+  @@unique([userId, ownerId])  //Prevent duplicate subscription
+}
+
+model ParkingSession {
+  id Int @id @default(autoincrement())
+
+  userId Int 
+  user Account @relation(fields: [userId], references: [id])
+
+  parkingLotId Int
+  parkingLot ParkingLot @relation(fields:[parkingLotId], references: [id])
+
+  startTime DateTime @default(now())
+  endTime DateTime?
+  durationInMinutes Int?
+  fare Int?
+
+}
