@@ -23,7 +23,10 @@ interface MapSelectorProps {
 }
 
 export function MapSelector({ onLocationSelect }: MapSelectorProps) {
-  const defaultPosition: [number, number] = [22.5726, 88.3639]; // Kolkata
+  const defaultPosition: [number, number] = [
+    parseFloat(process.env.NEXT_PUBLIC_DEFAULT_LAT!),
+    parseFloat(process.env.NEXT_PUBLIC_DEFAULT_LON!)]; 
+    // Parlakhemundi location
 
   const [position, setPosition] = useState<[number, number]>(defaultPosition);
 

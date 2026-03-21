@@ -13,33 +13,50 @@ interface sessionProps {
 export const ActiveSession = () => {
 
     const { refreshTrigger } = useSessionStore();
+    const {triggerRefresh} = useSessionStore();
+    const [exiting, setExiting] = useState<boolean>(false)
 
     const [sessionData, setSessionData] = useState<any>([]);
     const [lotData, setLotData] = useState<any>([]);
     const [startTime,setStartTime] = useState<string | null>(null);
+
+    const [loading,setLoading] = useState<boolean>(false);
     const [active,setActive] = useState<boolean>(false);
 
-    const exitHandler = async() => {
-        const res = await axios.post("/api/user/endSession");
-        setActive(false);
-    setSessionData([]);
-    setLotData([]);
-    setStartTime(null);
+    const exitHandler = async () => {
+        setExiting(true)
+        try {
+            await axios.post("/api/user/endSession");
+            triggerRefresh();
+            setActive(false);
+            setSessionData([]);
+            setLotData([]);
+            setStartTime(null);
+        } catch(err) {
+            console.error(err)
+        } finally {
+            setExiting(false)
+        }
     }
 
     useEffect(() => {
         const fetchSession = async () => {
-            const res = await axios.get("/api/user/activeSession")
-            
-            if(res.status == 201) {
-                setStartTime(res.data.startTime);
-                setSessionData(res.data)
-                setLotData(res.data.parkingLot)
-                setActive(true)
-            } else {
-                setActive(false)
+
+            try {
+                setLoading(true);
+                const res = await axios.get("/api/user/activeSession")
+                
+                if(res.status == 201) {
+                    setStartTime(res.data.startTime);
+                    setSessionData(res.data)
+                    setLotData(res.data.parkingLot)
+                    setActive(true)
+                } else {
+                    setActive(false)
+                }
+            } finally {
+                setLoading(false)
             }
-            
         }
         fetchSession()
     },[refreshTrigger])
@@ -77,13 +94,13 @@ export const ActiveSession = () => {
 
 
     return <div>
-        <div className="max-w-7xl mx-auto px-6 pb-50">
+        <div className="max-w-7xl mx-auto px-6 ">
             <div className="space-y-5">
                 <div>
                     <h1 className="font-bold md:text-3xl text-2xl">Your Active Session</h1>
                 </div>
 
-                {active ? <div className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl border-2">
+                {loading ? <div className="shadow-md flex items-center justify-center text-xl font-semibold p-20 animate-pulse">Loading...</div> : active ? (<div className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl border-2">
                     <div className="flex justify-between bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 text-white p-6 items-center ">
                         <div className="space-y-2 ">
                             <h1 className="font-bold text-2xl">{lotData.name}</h1>
@@ -104,9 +121,9 @@ export const ActiveSession = () => {
                                 <p className={cn("font-semibold text-xl",(param.name) == "Current Fare" && "text-emerald-600 font-bold")}>{param.value}</p>
                             </div>
                         ))}
-                            <button onClick={exitHandler} className="bg-red-500 px-8 text-white font-semibold text-lg rounded-sm cursor-pointer hover:scale-103 transition-all duration-300 ease-in-out">Exit</button>
+                            <button disabled={exiting} onClick={exitHandler} className="bg-red-500 px-8 text-white font-semibold text-lg rounded-sm cursor-pointer hover:scale-103 transition-all duration-300 ease-in-out">{exiting ? "Exiting..." : "Exit"}</button>
                     </div>
-                </div> : <div>No active sessions</div>}
+                </div>) : <div className="shadow-md flex items-center justify-center text-xl font-semibold p-20">No active sessions</div>}
             </div>
         </div>
     </div>

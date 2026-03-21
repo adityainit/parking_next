@@ -1,7 +1,7 @@
 import { useSessionStore } from "@/lib/store/sessionStore"
 import { cn } from "@/lib/utils"
 import axios from "axios"
-import { IndianRupee, MapPin } from "lucide-react"
+import { Car, IndianRupee, MapPin, ParkingSquareIcon } from "lucide-react"
 import { useState } from "react"
 
 
@@ -15,6 +15,7 @@ interface lotInfoProps {
     type? : "full" | "half"
     ownerId : number
     isActive? : boolean 
+    index? : number
 }
 
 
@@ -22,12 +23,20 @@ interface lotInfoProps {
 
 export const LotInfoCard = (props : lotInfoProps) => {
 
+    const variant = (props.index ?? 0) % 2;
+
     const { triggerRefresh } = useSessionStore()
+    const [parking, setParking] = useState<boolean>(false)
+
+    const formatDistance = (km: number) => {
+        return `${km.toFixed(1)} KM`
+    }
+
 
     const lotParams = [
         {name:"Available",value:0}, 
         {name:"Capacity", value:props.lotCapacity},
-        {name:"Distance", value:0}
+        {name:"Distance", value:formatDistance(props.distance)}
         // figure out about the distance and the capacity
     ]
 
@@ -60,64 +69,80 @@ export const LotInfoCard = (props : lotInfoProps) => {
     }
 
     const parkHandler = async () => {
-        try{
-            await axios.post("/api/user/startSession",{
-                parkingLotId: props.id
-            });
+        setParking(true)
+        try {
+            await axios.post("/api/user/startSession", { parkingLotId: props.id });
             triggerRefresh();
-            console.log("Parking session started")
         } catch(err) {
             console.error(err)
+        } finally {
+            setParking(false)
         }
     }
 
 
-    return <div className={cn("border-2  overflow-hidden rounded-lg  transition-all duration-300 ease-in-out",props.type == "full" ? "shadow-lg hover:shadow-xl hover:-translate-y-1" : "bg-stone-300/20 hover:border-emerald-600")}>
-            {props.type=="full" ? <div className="bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-600 h-40"/> : null}
-            <div className="space-y-3 p-5">
+    return <div className={cn("border-2  overflow-hidden rounded-4xl  transition-all duration-300 ease-in-out",props.type == "full" ? "shadow-lg hover:shadow-xl hover:-translate-y-1" : "bg-stone-300/20 hover:border-emerald-600")}>
+            {props.type=="full" ? <div className={cn(" h-48 relative" , variant === 0 ? "bg-[#7ad7c6]" : "bg-[#cfe6f2]")}>
+                {/* the pattern div */}
+                <div className="absolute top-4 right-4 rounded-full bg-white/70 px-3 py-1 text-xs font-medium text-primary ">
+                    {formatDistance(props.distance)}
+                </div>
+                <div className="absolute inset-0 opacity-30" 
+                style={variant === 0 ? {
+                    backgroundImage: "radial-gradient(circle at 10px 10px, white 2px, transparent 0)",
+                    backgroundSize: "30px 30px"
+                } : {
+                    backgroundImage: "repeating-linear-gradient(135deg, transparent, transparent 8px, white 8px, white 9px)",
+                    backgroundSize: "30px 30px"
+                }}>
+                </div>
+                <span className="relative z-10 flex items-center text-primary/50 justify-center h-full">{variant === 0 ?<Car className="h-20 w-20 "/> : <ParkingSquareIcon className="h-15 w-15  "/>}</span>
+            </div> : null}
+            <div className="space-y-3 p-8 bg-white">
                 {/* heading */}
-                <div className="flex justify-between items-center border-b pb-2">
-                    <div>
+                <div className="flex justify-between items-center  pb-2">
+                    <div className="space-y-1">
                         {/* add a recommended badge */}
                         <h1 className="font-semibold text-xl">{props.name}</h1>
-                        <p className="flex items-center gap-1 text-sm text-stone-800">
-                            <MapPin className="w-3 text-emerald-700"/>
+                        <p className=" gap-1 font-medium text-sm text-stone-800">
                             <span>{props.address} </span>
                         </p>
                     </div>
                     <div className="flex flex-col items-end">
-                        <h1 className="font-semibold text-3xl text-emerald-600">
-                            ₹{props.pricePerHour}
+                        <p className="text-xs text-primary/80">0 SPOTS AVAILABLE</p>
+                        <h1 className="font-semibold text-3xl text-primary">
+                            ₹{props.pricePerHour}<span className="text-sm">/HR</span>
                         </h1>
-                        <p className="text-sm text-stone-600">per hour</p>
+                        
                     </div>
                 </div>
 
                 {/* lot details like space lotCapacity and all */}
-                <div className="flex justify-between">
+                {/* <div className="flex justify-between">
                     {lotParams.map((param) => (
                         <div key={param.name}>
                             <p>{param.name}</p>
-                            <h1 className="font-semibold text-2xl">{param.value} {param.name == "Distance" && "mi"}</h1>
+                            <h1 className="font-semibold text-2xl">{param.value} </h1>
                         </div>
                     ))}
-                </div>
+                </div> */}
                 
                 <div className={cn(sub && "grid grid-cols-2 gap-3")}>
+                    
+                    {sub && <div>
+                        <button disabled={parking} onClick={parkHandler} className="border w-full py-2 border-emerald-600 font-semibold  rounded-lg cursor-pointer hover:bg-primary-container transition-all duration-300 ease-in-out bg-primary text-white">
+                            {parking ? "Parking..." : "Park"}
+                        </button>
+                    </div>}
                     <button onClick={subHandler} 
                     disabled={loading}
-                    className="border w-full py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold  rounded-lg cursor-pointer hover:shadow-lg hover:shadow-emerald-600/20 hover:scale-103 transition-all duration-300 ease-in-out">
+                    className="border w-full py-2 font-semibold  rounded-lg cursor-pointer bg-gray-100 hover:bg-gray-200 transition-all duration-300 ease-in-out">
                     {/* do state management here */}
                         {loading
                         ? (sub ? "Unsubscribing..." : "Subscribing...")
                         : (sub ? "Subscribed" : "Subscribe")
                         }
                     </button>
-                    {sub && <div>
-                        <button onClick={parkHandler} className="border w-full py-2 bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold  rounded-lg cursor-pointer hover:shadow-lg hover:shadow-emerald-600/20 hover:scale-103 transition-all duration-300 ease-in-out">
-                            Park
-                        </button>
-                    </div>}
                 </div>
             </div>
     </div>

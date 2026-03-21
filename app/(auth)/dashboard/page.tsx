@@ -1,7 +1,7 @@
 import { UserDashboard } from "@/components/user/dashboard";
 
 const Dashboard = () => {
-    return <div>
+    return <div className="bg-gray-100">
         <UserDashboard/>
     </div>
 }
