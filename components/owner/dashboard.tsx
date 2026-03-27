@@ -8,6 +8,7 @@ import {  LotStats } from "./lotStats";
 import { LotInfo } from "./lotInfo";
 import { LiveSessions } from "./liveSessoins";
 import { Subscribers } from "./subscribers";
+import { OwnerHistory } from "./ownerHistory";
 
 
 export const OwnerDashboard = () => {
@@ -41,7 +42,7 @@ export const OwnerDashboard = () => {
     }, [])
 
     if(loading) {
-        return <div>Loading...</div>
+        return <div className="flex items-center h-[500px] justify-center animate-pulse text-3xl font-semibold ">Loading...</div>
     }
 
     if(!lot) {
@@ -54,6 +55,7 @@ export const OwnerDashboard = () => {
         <LotStats />
         <LotInfo name={lot.name} address={lot.address} pricePerHour={lot.pricePerHour} createdAt={lot.createdAt} latitude={lot.latitude} longitude={lot.longitude}/>
         <LiveSessions pricePerHour={lot.pricePerHour}/>
+        <OwnerHistory/>
         <Subscribers/>
     </div>
 }

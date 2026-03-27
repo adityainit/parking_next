@@ -31,7 +31,7 @@ export default function Onboarding() {
 
     },[role, isLoaded, isSignedIn, router]);
 
-    return <div>
+    return <div className="flex items-center h-[500px] justify-center animate-pulse text-3xl font-semibold ">
         Setting up your account....
     </div>
 }

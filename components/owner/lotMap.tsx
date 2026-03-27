@@ -47,8 +47,8 @@ export const SinglePinMap = ({ latitude, longitude, name, address }: SinglePinMa
         scrollWheelZoom={false}
       >
         <TileLayer
-          attribution='&copy; OpenStreetMap contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution="&copy; Google Maps"
+          url="https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}"
         />
         <Marker position={[latitude, longitude]} icon={parkingIcon}>
           <Popup>

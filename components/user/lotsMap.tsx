@@ -58,8 +58,8 @@ export const LotsMap = ({ lots }: LotsMapProps) => {
         scrollWheelZoom={false}
         >
         <TileLayer
-            attribution='&copy; OpenStreetMap contributors'
-            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution="&copy; Google Maps"
+            url="https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}"
         />
         {lots.map((lot) => (
             <Marker
@@ -71,6 +71,13 @@ export const LotsMap = ({ lots }: LotsMapProps) => {
                 <div className="space-y-1">
                 <p className="font-semibold">{lot.name}</p>
                 <p className="text-sm text-stone-600">{lot.address}</p>
+                <a href={`https://www.google.com/maps?q=${lot.latitude},${lot.longitude}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-teal-600 font-semibold flex items-center gap-1 hover:underline"
+              >
+                Open in Google Maps ↗
+              </a>
                 </div>
             </Popup>
             </Marker>

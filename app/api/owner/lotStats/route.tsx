@@ -34,6 +34,8 @@ export async function GET() {
     const startOfToday = new Date();
     startOfToday.setHours(0,0,0,0);
 
+    //make it total revenue instead of today's revernue
+
     const revenueData = await prisma.parkingSession.aggregate({
         where:{
             parkingLotId: lot.id,

@@ -49,8 +49,8 @@ export function MapSelector({ onLocationSelect }: MapSelectorProps) {
       style={{ height: "400px", width: "100%" }}
     >
       <TileLayer
-        attribution='&copy; OpenStreetMap contributors'
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        attribution="&copy; Google Maps"
+        url="https://mt1.google.com/vt/lyrs=r&x={x}&y={y}&z={z}"
       />
       <LocationMarker />
     </MapContainer>

@@ -1,4 +1,4 @@
-import { Info } from "lucide-react"
+import { ExternalLink, Info } from "lucide-react"
 import dynamic from "next/dynamic"
 
 const SinglePinMap = dynamic(() => import("./lotMap").then(m => m.SinglePinMap), {
@@ -61,6 +61,14 @@ export const LotInfo = ({pricePerHour,createdAt,longitude,latitude,name,address}
                             <h1 className="font-bold">{formatCoords(latitude,longitude)}</h1>
                         </div>
                     </div>
+                    <a href={`https://www.google.com/maps?q=${latitude},${longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex gap-2 items-center absolute z-[1000] bottom-4 right-4 bg-white px-4 py-3 rounded-lg shadow-md hover:shadow-lg transition-all"
+                    >
+                        <ExternalLink className="w-4 h-4 text-teal-700"/>
+                        <p className="text-sm font-semibold text-teal-700">Open in Maps</p>
+                    </a>
                 </div>
             </div>
         </div>
