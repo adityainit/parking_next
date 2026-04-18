@@ -19,7 +19,6 @@ export async function GET(){
                 parkingLot:true
             }
         })
-        console.log(active);
         if(active) {
             return NextResponse.json(active,{status:201})
         } else {

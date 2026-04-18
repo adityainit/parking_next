@@ -23,6 +23,6 @@ export default function PostLogin () {
         fetchRole()
     },[])
     return <div className="flex items-center h-[500px] justify-center animate-pulse text-3xl font-semibold ">
-        Configuring your dashboard based on the role
+        Configuring your dashboard based on the role...
     </div>
 }

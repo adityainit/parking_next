@@ -1,6 +1,14 @@
+"use client"
 import { ChevronRight, Sparkles } from "lucide-react"
 
 export const HeroSection = () => {
+
+    const scrollToBottom = () => {
+        window.scrollTo({
+            top: document.body.scrollHeight,
+            behavior: "smooth",
+        });
+    };
 
     // subject-b
     return <div className="relative bg-gradient-to-b from-stone-100 via-primary/10 to-stone-100 flex ">
@@ -28,14 +36,12 @@ export const HeroSection = () => {
                 </div>
 
                 <div className="flex gap-14">
-                    <button className=" text-white bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-4 text-lg rounded-lg hover:shadow-lg hover:shadow-emerald-600/20 font-semibold transition-all duration-200 ease-in-out">
+                    <button onClick={scrollToBottom} className=" text-white bg-gradient-to-r from-emerald-600 to-teal-600 px-8 py-4 text-lg rounded-lg hover:shadow-lg hover:shadow-emerald-600/20 font-semibold transition-all duration-200 ease-in-out cursor-pointer">
 
-                        <span>Button </span>
+                        <span>Get Started </span>
 
                     </button>
-                    <button className="px-8 py-4 border-2 rounded-lg text-lg font-semibold text-stone-700 border-stone-300 hover:border-emerald-400 hover:bg-emerald-50 transition-all duration-200 ease-in-out">
-                        <span>Button</span>
-                    </button>
+                    
                 </div>
 
                 <div className="flex border-t border-stone-200 gap-10 pt-8">

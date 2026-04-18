@@ -15,11 +15,17 @@ type Subscriber = {
 export const Subscribers = () => {
   const [subscribers, setSubscribers] = useState<Subscriber[]>([])
   const [showAll, setShowAll] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false)
 
   useEffect(() => {
     const fetchSubscribers = async () => {
-      const res = await axios.get("/api/owner/subscribers")
-      setSubscribers(res.data)
+      try {
+        setLoading(true)
+        const res = await axios.get("/api/owner/subscribers")
+        setSubscribers(res.data)
+      } finally {
+        setLoading(false)
+      }
     }
     fetchSubscribers()
   }, [])
@@ -40,7 +46,9 @@ export const Subscribers = () => {
         )}
       </div>
 
-      {subscribers.length === 0
+      {loading
+        ? <div className="bg-[#f2f4f5] rounded-xl p-10 text-center animate-pulse font-semibold">Loading...</div>
+        : subscribers.length === 0
         ? <div className="bg-[#f2f4f5] rounded-xl p-10 text-center text-gray-400">No subscribers yet</div>
         : <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {displayed.map((sub) => (

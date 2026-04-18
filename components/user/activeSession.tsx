@@ -3,63 +3,69 @@ import { useSessionStore } from "@/lib/store/sessionStore"
 import { cn } from "@/lib/utils"
 import axios from "axios"
 import { MapPin } from "lucide-react"
-import { useEffect, useState } from "react"
-
-interface sessionProps {
-    name: string
-    adress: string
-}
+import { useCallback, useEffect, useState } from "react"
 
 export const ActiveSession = () => {
+  const { refreshTrigger, triggerRefresh } = useSessionStore(); // ← merged
+  const [exiting, setExiting] = useState<boolean>(false)
+  const [sessionData, setSessionData] = useState<any>([]);
+  const [lotData, setLotData] = useState<any>(null);
+  const [startTime, setStartTime] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [active, setActive] = useState<boolean>(false);
 
-    const { refreshTrigger } = useSessionStore();
-    const {triggerRefresh} = useSessionStore();
-    const [exiting, setExiting] = useState<boolean>(false)
-
-    const [sessionData, setSessionData] = useState<any>([]);
-    const [lotData, setLotData] = useState<any>([]);
-    const [startTime,setStartTime] = useState<string | null>(null);
-
-    const [loading,setLoading] = useState<boolean>(false);
-    const [active,setActive] = useState<boolean>(false);
-
-    const exitHandler = async () => {
-        setExiting(true)
-        try {
-            await axios.post("/api/user/endSession");
-            triggerRefresh();
-            setActive(false);
-            setSessionData([]);
-            setLotData([]);
-            setStartTime(null);
-        } catch(err) {
-            console.error(err)
-        } finally {
-            setExiting(false)
-        }
+  const exitHandler = async () => {
+    setExiting(true)
+    try {
+      await axios.post("/api/user/endSession");
+      triggerRefresh();
+      setActive(false);
+      setSessionData([]);
+      setLotData(null);
+      setStartTime(null);
+    } catch(err) {
+      console.error(err)
+    } finally {
+      setExiting(false)
     }
+  }
 
-    useEffect(() => {
-        const fetchSession = async () => {
+  const fetchSession = useCallback(async (showLoader = true) => { // ← useCallback
+    try {
+      if(showLoader) setLoading(true)
+      const res = await axios.get("/api/user/activeSession")
+      if(res.status == 201) {
+        setStartTime(res.data.startTime);
+        setSessionData(res.data)
+        setLotData(res.data.parkingLot)
+        setActive(true)
+      } else {
+        setActive(false)
+        setLotData(null);
+        setStartTime(null)
+      }
+    } finally {
+      if(showLoader) setLoading(false)
+    }
+  }, []) // ← empty deps, only uses setState functions
 
-            try {
-                setLoading(true);
-                const res = await axios.get("/api/user/activeSession")
-                
-                if(res.status == 201) {
-                    setStartTime(res.data.startTime);
-                    setSessionData(res.data)
-                    setLotData(res.data.parkingLot)
-                    setActive(true)
-                } else {
-                    setActive(false)
-                }
-            } finally {
-                setLoading(false)
-            }
-        }
-        fetchSession()
-    },[refreshTrigger])
+  useEffect(() => {
+    const eventSource = new EventSource("/api/rfid/stream")
+    eventSource.onmessage = (e) => {
+      if(e.data === "refresh") {
+        triggerRefresh();
+        fetchSession(false);
+      }
+    }
+    eventSource.onerror = () => eventSource.close()
+    return () => eventSource.close()
+  }, [fetchSession, triggerRefresh])
+
+  useEffect(() => {
+    fetchSession(true)
+  }, [refreshTrigger, fetchSession])
+
+  // ... rest of your code stays the same
 
     const getDuration = () => {
         if(!startTime) return 0;
@@ -100,7 +106,7 @@ export const ActiveSession = () => {
                     <h1 className="font-bold md:text-3xl text-2xl">Your Active Session</h1>
                 </div>
 
-                {loading ? <div className="shadow-md flex items-center justify-center text-xl font-semibold p-20 animate-pulse">Loading...</div> : active ? (<div className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl border-2">
+                {loading ? <div className="shadow-md flex items-center justify-center text-xl font-semibold p-20 animate-pulse">Loading...</div> : (active && lotData)? (<div className="rounded-lg overflow-hidden shadow-lg hover:shadow-xl border-2">
                     <div className="flex justify-between bg-gradient-to-br from-primary via-teal-500 to-cyan-600 text-white p-6 items-center ">
                         <div className="space-y-2 ">
                             <h1 className="font-bold text-2xl">{lotData.name}</h1>

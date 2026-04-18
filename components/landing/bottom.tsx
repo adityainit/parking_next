@@ -26,7 +26,7 @@ export const Bottom = () => {
 
                     <SignedIn>
 
-                        <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">Ready to transform parking?</h1>
+                        <h1  className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent cursor-pointer">Explore the role based dashboard</h1>
 
                     </SignedIn>
                     

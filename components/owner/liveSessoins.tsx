@@ -2,7 +2,7 @@
 
 import { useSessionStore } from "@/lib/store/sessionStore"
 import axios from "axios"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { LiveSessionCard } from "../liveSessionCard"
 import { cn } from "@/lib/utils"
 
@@ -16,16 +16,34 @@ type sessions = {
 export const LiveSessions = ({pricePerHour} : {pricePerHour: number}) => {
 
     const [ sessions,setSessions ] = useState<sessions[]>([]);
+    const [ loading,setLoading ] = useState<boolean>(false);
 
-    useEffect(() => {
-        const fetchSessions = async () => {
+    const fetchSessions = useCallback(async () => {
+        try {
+            setLoading(true);
             const res = await axios.get("/api/owner/activeSessions");
             setSessions(res.data);
-            console.log(res.data)
+        } finally {
+            setLoading(false);
         }
+        
+    }, [])
+
+    // SSE listener
+    useEffect(() => {
+        const eventSource = new EventSource("/api/rfid/stream")
+        eventSource.onmessage = (e) => {
+            if(e.data === "refresh") fetchSessions()
+        }
+        eventSource.onerror = () => eventSource.close()
+        return () => eventSource.close()
+    }, [fetchSessions])
+
+    useEffect(() => {
+        
         fetchSessions();
         //do something like it will re-fetch the data in every 10 second web sockets > setInterval
-    },[])
+    },[fetchSessions])
 
     
 
@@ -49,18 +67,20 @@ export const LiveSessions = ({pricePerHour} : {pricePerHour: number}) => {
                         </tr>
                     </thead>
                     <tbody className="divide-y bg-white">
-                        {sessions.length === 0
+                    {loading
+                        ? <tr><td colSpan={5} className="px-8 py-10 text-center animate-pulse font-semibold">Loading...</td></tr>
+                        : sessions.length === 0
                         ? <tr><td colSpan={5} className="px-8 py-10 text-center text-gray-400">No active sessions</td></tr>
                         : sessions.map((session) => (
-                            <LiveSessionCard
+                        <LiveSessionCard
                             key={session.id}
                             name={session.user.name ?? "Unknown"}
                             startTime={session.startTime}
                             pricePerHour={pricePerHour}
-                            />
+                        />
                         ))
-                        }
-                    </tbody>
+                    }
+</tbody>
                     </table>
                 </div>
             </div>

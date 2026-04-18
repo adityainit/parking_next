@@ -41,7 +41,6 @@ export async function GET(req: Request) {
         }));
 
 
-        console.log(formattedLots);
         return NextResponse.json({allLots:formattedLots}, {status:200});
     } catch(err) {
         console.error(err);

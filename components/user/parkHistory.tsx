@@ -38,7 +38,6 @@ export const ParkHistory = () => {
                 setSessions(res.data);
                 setYes(res.data.length > 0)
                 
-                console.log(res.data);
             } finally {
                 setLoading(false);
             }

@@ -44,7 +44,6 @@ export const Navbar = () => {
                         {[
                         {name: "Features", path:"/features"},
                         {name: "How it works", path:"/howItWorks"},
-                        {name: "Pricing", path: "/pricing"},
                         ].map((item) => (
                             <Link key={item.path} href={item.path}>
                                 <div className={cn(
